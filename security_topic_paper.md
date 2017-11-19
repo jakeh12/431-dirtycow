@@ -195,7 +195,9 @@ When we write into the memory location where the file contents is mapped to, the
 
 Let's do an experiment with a read-only file to gain a little more knowledge before attempting the exploit. The code is fairly similar to the code we have already ran, but there are a few differences.
 
-We will need to create a read-only file. The simplest way to do so is to create a file as a root. You can run the following to create a read-only file.
+You might wonder why we would ever want to write into a read-only file. Sometimes, we use files which are read-only to obtain some useful data for our program. We read the data but sometimes we need to write in the data to process it. Think of a very large tab-separated file and you need to change all the tabs into semicolons for further processing (and for some reason you want to do it all at once, not loading it line by line). You can load this read-only file in the memory with `mmap()` and specifying **`MAP_PRIVATE`** in the arguments. If we ever write into it, the operating system will create a **private copy** of the file contents for us to write into and use. More on this topic later.
+
+To run this program, will need to create a read-only file. The simplest way to do so is to create a file as a root. You can run the following to create a read-only file.
 
 ```bash
 $ su -c "echo aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa > test"
@@ -334,7 +336,7 @@ Let's illustrate what happens after we call `write()`.
 
 ![Mapping to memory](./cow.png)
 
-Everything else stays the same as it was in the previous code example until we call `write()`. Since the mapping is private, a `write()` will cause a copy-on-write. In other words, the kernel will provide us a copy to write into. Now it is important to realize that the physical address of the copy is different from the original but the virtual is not. The virtual address saved in our `map` pointer stays the same but the translated physical address is now different. The `write()` change is signified in red in the drawing. When we call either `madvise()` or `unmap()`, the following happens.
+Everything else stays the same as it was in the previous code example until we call `write()`. Since the mapping is private (`MAP_PRIVATE`), a `write()` will cause a copy-on-write. In other words, the kernel will provide us a copy to write into. Now it is important to realize that the physical address of the copy is different from the original but the virtual is not. The virtual address saved in our `map` pointer stays the same but the translated physical address is now different. The `write()` change is signified in red in the drawing. When we call either `madvise()` or `unmap()`, the following happens.
 
 ![Mapping to memory](./cleanup.png)
 
