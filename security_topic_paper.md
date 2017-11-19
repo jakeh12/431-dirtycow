@@ -4,36 +4,36 @@
 **November 17, 2017**
 
 ### Introduction ###
-Dirty copy-on-write is a serious Linux kernel vulnerability which allows local priviledge escalation through a race condition in the kernel's implementation of memory-management.
+Dirty copy-on-write is a serious Linux kernel vulnerability which allows local privilege escalation through a race condition in the kernel's implementation of memory-management.
 
-The dirty copy-on-write exploit allows an attacker to gain a write access to read-only files. This can lead to escalating prilidges on any device. After a successful exploit, which usually takes only a couple of seconds, an attacker can damage valuable files, rendering a device unusable, or gain root privilidges and install malicious software into any device without the user ever knowing. The attacker has a root access to the entire device and therefore it is up to the attacker what to do with it.
+The dirty copy-on-write exploit allows an attacker to gain a write access to read-only files. This can lead to escalating privileges on any device. After a successful exploit, which usually takes only a couple of seconds, an attacker can damage valuable files, rendering a device unusable, or gain root privileges and install malicious software into any device without the user ever knowing. The attacker has a root access to the entire device and therefore it is up to the attacker what to do with it.
 
 ### History ###
-This security issue was discovered by a security researcher Phil Oester who was doing forensic analysis on some of his webservers and happened to find an executable exploit uploaded by an attacker. He was able to extract the version of GCC which compiled the source code. It turned out to be GCC 4.8.5 which was released on June 23, 2016, though this should not imply that the exploit was not available earlier. The vulnerability has existed since the Linux kernel version 2.6.22 released in 2007.
+This security issue was discovered by a security researcher Phil Oester who was doing forensic analysis on some of his web servers and happened to find an executable exploit uploaded by an attacker. He was able to extract the version of GCC which compiled the source code. It turned out to be GCC 4.8.5 which was released on June 23, 2016, though this should not imply that the exploit was not available earlier. The vulnerability has existed since the Linux kernel version 2.6.22 released in 2007.
 
 ### Affected Systems ###
-Every device running Linux kernel-based operating system, including servers, industrial computers, desktops, laptops, and mobile devices, with kernel version newer than 2.6.22 and older than 4.8.3 is affected unless the operating system is patched. Major Linux distributions provided patches only a couple of hours after the vulnerability was publicly disclosed on October 19, 2016. Linux kernel fix was released a day before the public disclosure as Paul Oester infromed Linus Torvalds, the creator of Linux, about the vulnerability beforehand so that Linus can produce a patch for others to use.
+Every device running Linux kernel-based operating system, including servers, industrial computers, desktops, laptops, and mobile devices, with kernel version newer than 2.6.22 and older than 4.8.3 is affected unless the operating system is patched. Major Linux distributions provided patches only a couple of hours after the vulnerability was publicly disclosed on October 19, 2016. Linux kernel fix was released a day before the public disclosure as Paul Oester informed Linus Torvalds, the creator of Linux, about the vulnerability beforehand so that Linus can produce a patch for others to use.
 
-It is important to note that one of the most popular mobile operating systems, Android, running on more than 2 billion devices world-wide,  is also affected as it is based on the Linux kernel. As manufacturers have to create their own drivers for their smart phones, the release of new version of Android becomes somewhat complicated. One of the common scenarios is that Google, the creator and maintainer of Android, releases a new version, but it is up to the phone manufacturer or sometimes even the carrier when to release the update to their phones. This leaves countless users with a vulnerable phone in their pockets. Devices running Android version 5.1.1 or older, which accounts for 48.2% of all Android devices (as of November 2018), are suceptible to the attack.
+It is important to note that one of the most popular mobile operating systems, Android, running on more than 2 billion devices world-wide,  is also affected as it is based on the Linux kernel. As manufacturers have to create their own drivers for their smart phones, the release of new version of Android becomes somewhat complicated. One of the common scenarios is that Google, the creator and maintainer of Android, releases a new version, but it is up to the phone manufacturer or sometimes even the carrier when to release the update to their phones. This leaves countless users with a vulnerable phone in their pockets. Devices running Android version 5.1.1 or older, which accounts for 48.2% of all Android devices (as of November 2018), are susceptible to the attack.
 
 As of September 2017, more than 1,200 apps available in third-party market places contain dirty copy-on-write exploit to run text-based payment services to make fraudulent charges to the phone owner as reported by researchers of the antivirus firm Trend Micro.
 
 ### Security Impact ###
-The severity of this vulnerability ([CVE-2016-5195](https://nvd.nist.gov/vuln/detail/CVE-2016-5195)) is high, as indicated by the CVSS (Common Vulnerability Scoring System) Base Score of 7.8 published by the NIST. The complexity of the attact is low, as well as the priviledges required. The dirty copy-on-write vulnerability severely breaks all three classes of the CIA triad–confidentiality, integrity, and availability.
+The severity of this vulnerability ([CVE-2016-5195](https://nvd.nist.gov/vuln/detail/CVE-2016-5195)) is high, as indicated by the CVSS (Common Vulnerability Scoring System) Base Score of 7.8 published by the NIST. The complexity of the attack is low, as well as the privileges required. The dirty copy-on-write vulnerability severely breaks all three classes of the CIA triad–confidentiality, integrity, and availability.
 
 ### Vulnerability ###
-Linux kernel offers system calls for mapping files from disks into the memory for cases where we need to open a file that is very large or when we need to share a file resource between two processes. The system calls involved in the dirty copy-on-write are `mmap()`, `madvise()`, and `write()`. `mmap()` tells the kernel to map a file to a memory region, `madvise()` informs the kernel what the intended future use for that memory region is, and `write()` tells the kernel to write bytes into the memory region. It is important to note that most of these system calls are not atomic. That means, in a multi-threaded program, we can have a context switch happen in middle of a `write()` operation. It is this non-atomic nature of the `write()` call for writing into a memory-mapped read-only file and insufficient programmatic check for the race condition which causes the dirty copy-on-write vulnerability to exist.
+Linux kernel offers system calls for mapping files from disks into the memory for cases where we need to open a file that is very large or when we need to share a file resource between two processes. The system calls involved in the dirty copy-on-write are `mmap()`, `madvise()`, and `write()`. The system call `mmap()` tells the kernel to map a file to a memory region, `madvise()` informs the kernel what the intended future use for that memory region is, and `write()` tells the kernel to write bytes into the memory region. It is important to note that most of these system calls are not atomic. That means, in a multi-threaded program, we can have a context switch happen in middle of a `write()` operation. It is this non-atomic nature of the `write()` call for writing into a memory-mapped read-only file and insufficient programmatic check for the race condition which causes the dirty copy-on-write vulnerability to exist.
 
 Before we dive too deep into the theory and let's look at how memory mapping works and explore the entire vulnerability below
 
 ### Setup
 The tutorial provided is a set of three programs that will help you understand the copy-on-write exploit.
 
-You will need a virtual machine runnning the unpatched version of the vulnerable Linux kernel. I successfully tested the code on 64-bit Ubuntu Desktop 16.04.1. This version of Ubuntu is running Linux kernel version 4.4.0. The distribution iso image is available [here](http://old-releases.ubuntu.com/releases/16.04.0/ubuntu-16.04.1-desktop-amd64.iso).
+You will need a virtual machine running the unpatched version of the vulnerable Linux kernel. I successfully tested the code on 64-bit Ubuntu Desktop 16.04.1. This version of Ubuntu is running Linux kernel version 4.4.0. The distribution iso image is available [here](http://old-releases.ubuntu.com/releases/16.04.0/ubuntu-16.04.1-desktop-amd64.iso).
 
 Before you first start your virtual machine, make sure to disable the "virtual" network adapter in the virtual machine settings. This will prevent Ubuntu from receiving the important security update which triggers automatically.
 
-After you install Ubuntu, go to Settings->Software & Updates->Updates (tab) and in "When there are security updates" select "Display immediatelly" instead of "Download and install immediatelly". Confirm it with OK. This will prevent Ubuntu from installing the kernel patch thus making dirty copy-on-write impossible.
+After you install Ubuntu, go to Settings->Software & Updates->Updates (tab) and in "When there are security updates" select "Display immediately" instead of "Download and install immediately". Confirm it with OK. This will prevent Ubuntu from installing the kernel patch thus making dirty copy-on-write impossible.
 
 Now you can shut the virtual machine off and go back into the machine's settings and re-enable the network adapter to gain internet access on your machine.
 
@@ -114,7 +114,7 @@ Let's analyze this program in sections.
 #include <unistd.h>
 #include <fcntl.h>
 ```
-These arethe header files needed for memory mapping and file operations.
+These are the header files needed for memory mapping and file operations.
 
 ```c
 #define CONTENT_LENGTH 40
@@ -293,7 +293,7 @@ This time we are opening a read-only file. Therefore, we need to open it appropr
 ```c
 int fm = open("/proc/self/mem", O_RDWR);
 ```
-In Linux operating system, almost everything acts as file that we can write and read out of for simplicity, even devices. Here, we are getting a file descriptor for memory of our own process. We are asking for read and write access. This is neccessary because we will be writing into a "read-only" mapping. If we used memcpy, the operating system would complain because it knows we cannot write into it. However, if we write into the memory on the low-level, it will actually write into the memory. Do not get too excited, becaue the Linux kernel will not allow to write it back into the file.
+In Linux operating system, almost everything acts as file that we can write and read out of for simplicity, even devices. Here, we are getting a file descriptor for memory of our own process. We are asking for read and write access. This is necessary because we will be writing into a "read-only" mapping. If we used memcpy, the operating system would complain because it knows we cannot write into it. However, if we write into the memory on the low-level, it will actually write into the memory. Do not get too excited, because the Linux kernel will not allow to write it back into the file.
 
 ```c
 lseek(fm, (uintptr_t) map, SEEK_SET);
@@ -326,9 +326,9 @@ aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 
 What? Why didn't it work? Well, it's not as simple to trick the Linux kernel to do something sinister.
 
-When we create a private mapping of memory and attempt to write into it, the operating system will create a copy of the memory-mapped file memory location and we are only writing into the copy. This is called **copy-on-write**. Now you know what the "cow" is all about.
+Remember the `MAP_PRIVATE` when we called `mmap()`? When we create a private mapping of memory and attempt to write into it, the operating system will create a copy of the memory-mapped file memory location and we are only writing into the copy. This is called **copy-on-write**. Now you know what the "cow" is all about.
 
-When we are done with this private copy, the operating system simply discards it because this copy is not directly related to the file on the disk. Then it looks at the original and since it has not been modified ("**dirty**" in operating system jargon means modified whereas clean means untouched), no change on disk is neccessary. Hopefully the term "dirty cow" makes more sense now.
+When we are done with this private copy, the operating system simply discards it because this copy is not directly related to the file on the disk. Then it looks at the original and since it has not been modified ("**dirty**" in operating system jargon means modified whereas clean means untouched), no change on disk is necessary. Hopefully the term "dirty cow" makes more sense now.
 
 Let's illustrate what happens after we call `write()`.
 
@@ -375,7 +375,7 @@ void *madvise_worker(void *arg)
 {
   while(1) {
     // tell the kernel that the memory-mapped file memory
-    // section is no longer neeeded and can be freed
+    // section is no longer needed and can be freed
     madvise(map, st.st_size, MADV_DONTNEED);
   }
 }
@@ -415,7 +415,9 @@ int main()
 }
 ```
 
-The code should be self-explanatory so let's run it right away.  We will analyze the program on thread-level later. Compile this file with:
+The code should be self-explanatory so let's run it right away.  We will analyze the program on thread-level later.
+
+Compile this file with:
 
 ```bash
 $ gcc -o racing racing.c -lpthread
@@ -474,10 +476,12 @@ After you run the program, two threads will start running concurrently. Let's go
 
 This process repeats forever until we kill the program. However, we are looking for a specific sequence of context switches which allows us to exploit the racing condition.
 
-The non-atomic nature of the `write` operation inside the `write_thread` can cause a context switch from the `write_thread` to `madvise_thread` after the kernel creates a private copy (1) and before the actual write into the private copy happens (2). Next, the `madvise_thread` will "deallocate" the private copy by changing the mapping of virtual address to the old, original physical address of the memory-mapped file location which should be read-only. If we get another context switch to occur after the physical address has been updated from the private copy to the original location, `write_thread` will take over and perform a write into the **same** virtual address but different physical address that it originally inteded thanks to `madvise_thread`.
+The non-atomic nature of the `write()` operation inside the `write_thread` can cause a context switch from the `write_thread` to `madvise_thread` after the kernel creates a private copy (1) and before the actual write into the private copy happens (2). Next, the `madvise_thread` will "deallocate" the private copy by changing the mapping of virtual address to the old, original physical address of the memory-mapped file location which should be read-only. If we get another context switch to occur after the physical address has been updated from the private copy to the original location, `write_thread` will take over and perform a write into the **same** virtual address but different physical address that it originally intended thanks to `madvise_thread`.
 
-#### Escalating Priviledges With Racing Threads ####
-We can modify the program to gain root priviledges. To do that, we will need to modify UID inside the `/etc/passwd` file. Locate your user entry in the `/etc/passwd`. You can use the following command:
+The vulnerability in the memory mapped `write()` is due to the absence of checking whether the memory page that is being checked for dirtiness had a copy that was previously deallocated. Linus Torvalds added a new flag and checking for this state into the code which deals with the copy-on-write to fix this vulnerability. You can find Linus' git commit which fixed the issue [here](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=19be0eaffa3ac7d8eb6784ad9bdbc7d67ed8e619). This fix is included in the Linux kernel since version 4.8.3.
+
+#### Escalating Privileges With Racing Threads ####
+We can modify the program to gain root privileges. To do that, we will need to modify UID inside the `/etc/passwd` file. Locate your user entry in the `/etc/passwd`. You can use the following command:
 
 ```bash
 $ cat /etc/passwd | grep -b <<your_username>>
@@ -518,13 +522,13 @@ Before executing the program, make sure to read **Kernel Panic Workaround** sect
 ```bash
 $ ./rootkit
 ```
-The program runs infinite loops and never finishes, therefore you have to kill it after a couple of seconds. I found three seconds to be sufficient to perfrom a dirty copy-on-write. Press `Ctrl+C` to terminate the program. Now you need to logout and login. You should be in a root shell now. Make sure to run
+The program runs infinite loops and never finishes, therefore you have to kill it after a couple of seconds. I found three seconds to be sufficient to perform a dirty copy-on-write. Press `Ctrl+C` to terminate the program. Now you need to logout and login. You should be in a root shell now. Make sure to run
 
 ```bash
 echo 0 > /proc/sys/vm/dirty_writeback_centisecs
 ```
 as soon as possible to avoid possible kernel panic.
-You have successfuly gained root priviledges to the system.
+You have successfully gained root privileges to the system.
 
 ##### Kernel Panic Workaround
 Some machine exhibit kernel panic behavior when attempting the dirty copy-on-write exploit after modifying the `/etc/passwd`. There are currently two workarounds.
