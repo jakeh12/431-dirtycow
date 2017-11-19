@@ -496,7 +496,9 @@ return 0;</code></pre></div>
 
 <p>Let&#39;s do an experiment with a read-only file to gain a little more knowledge before attempting the exploit. The code is fairly similar to the code we have already ran, but there are a few differences.</p>
 
-<p>We will need to create a read-only file. The simplest way to do so is to create a file as a root. You can run the following to create a read-only file.</p>
+<p>You might wonder why we would ever want to write into a read-only file. Sometimes, we use files which are read-only to obtain some useful data for our program. We read the data but sometimes we need to write in the data to process it. Think of a very large tab-separated file and you need to change all the tabs into semicolons for further processing (and for some reason you want to do it all at once, not loading it line by line). You can load this read-only file in the memory with <code>mmap()</code> and specifying <strong><code>MAP_PRIVATE</code></strong> in the arguments. If we ever write into it, the operating system will create a <strong>private copy</strong> of the file contents for us to write into and use. More on this topic later.</p>
+
+<p>To run this program, will need to create a read-only file. The simplest way to do so is to create a file as a root. You can run the following to create a read-only file.</p>
 
 <div><pre><code class="language-bash">$ su -c &quot;echo aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa &gt; test&quot;</code></pre></div>
 
@@ -620,7 +622,7 @@ aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</code></pre></div>
 
 <p><img src="./cow.png" alt="Mapping to memory"></p>
 
-<p>Everything else stays the same as it was in the previous code example until we call <code>write()</code>. Since the mapping is private, a <code>write()</code> will cause a copy-on-write. In other words, the kernel will provide us a copy to write into. Now it is important to realize that the physical address of the copy is different from the original but the virtual is not. The virtual address saved in our <code>map</code> pointer stays the same but the translated physical address is now different. The <code>write()</code> change is signified in red in the drawing. When we call either <code>madvise()</code> or <code>unmap()</code>, the following happens.</p>
+<p>Everything else stays the same as it was in the previous code example until we call <code>write()</code>. Since the mapping is private (<code>MAP_PRIVATE</code>), a <code>write()</code> will cause a copy-on-write. In other words, the kernel will provide us a copy to write into. Now it is important to realize that the physical address of the copy is different from the original but the virtual is not. The virtual address saved in our <code>map</code> pointer stays the same but the translated physical address is now different. The <code>write()</code> change is signified in red in the drawing. When we call either <code>madvise()</code> or <code>unmap()</code>, the following happens.</p>
 
 <p><img src="./cleanup.png" alt="Mapping to memory"></p>
 
