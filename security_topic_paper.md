@@ -1,5 +1,8 @@
 # Dirty COW (Copy-On-Write) #
-*Linux Kernel Vulnerability*
+*Linux Kernel Vulnerability Explanation and Tutorial by Jakub Hladik*
+
+**November 17, 2017**
+
 ### Introduction ###
 Dirty copy-on-write is a serious Linux kernel vulnerability which allows local priviledge escalation through a race condition in the kernel's implementation of memory-management.
 
@@ -19,14 +22,42 @@ As of September 2017, more than 1,200 apps available in third-party market place
 The severity of this vulnerability ([CVE-2016-5195](https://nvd.nist.gov/vuln/detail/CVE-2016-5195)) is high, as indicated by the CVSS (Common Vulnerability Scoring System) Base Score of 7.8 published by the NIST. The complexity of the attact is low, as well as the priviledges required. The dirty copy-on-write vulnerability severely breaks all three classes of the CIA triad–confidentiality, integrity, and availability.
 
 ### Vulnerability ###
-Linux kernel offers system calls for mapping files from disks into the memory. 
+Linux kernel offers system calls for mapping files from disks into the memory for cases where we need to open a file that is very large or when we need to share a file resource between two processes. The system calls involved in the dirty copy-on-write are `mmap()`, `madvise()`, and `write()`. `mmap()` tells the kernel to map a file to a memory region, `madvise()` informs the kernel what the intended future use for that memory region is, and `write()` tells the kernel to write bytes into the memory region. It is important to note that most of these system calls are not atomic. That means, in a multi-threaded program, we can have a context switch happen in middle of a `write()` operation. It is this non-atomic nature of the `write()` call for writing into a memory-mapped read-only file and insufficient programmatic check for the race condition which causes the dirty copy-on-write vulnerability to exist.
 
-### Give It A Try
+Before we dive too deep into the theory and let's look at how memory mapping works and explore the entire vulnerability below
+
+### Setup
 The tutorial provided is a set of three programs that will help you understand the copy-on-write exploit.
 
+You will need a virtual machine runnning the unpatched version of the vulnerable Linux kernel. I successfully tested the code on 64-bit Ubuntu Desktop 16.04.1. This version of Ubuntu is running Linux kernel version 4.4.0. The distribution iso image is available [here](http://old-releases.ubuntu.com/releases/16.04.0/ubuntu-16.04.1-desktop-amd64.iso).
+
+Before you first start your virtual machine, make sure to disable the "virtual" network adapter in the virtual machine settings. This will prevent Ubuntu from receiving the important security update which triggers automatically.
+
+After you install Ubuntu, go to Settings->Software & Updates->Updates (tab) and in "When there are security updates" select "Display immediatelly" instead of "Download and install immediatelly". Confirm it with OK. This will prevent Ubuntu from installing the kernel patch thus making dirty copy-on-write impossible.
+
+Now you can shut the virtual machine off and go back into the machine's settings and re-enable the network adapter to gain internet access on your machine.
+
+Now that you have a vulnerable virtual system running, let's get to programming.
+
 #### Mapping Files to Memory ####
+The system call `mmap()` maps a file directly into our memory. In the example below, we will open a file called `test` which you have to create and place it to the directory where your executable resides. Feel free to put any contents into the file. You can create a file with dummy content by running the following:
+
+```bash
+$ echo aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa > test
+```
+
+You can verify the contents of the file by running the following command, obtaining the content.
+
+```bash
+$ cat test
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+```
+
+Now, read through the program and try to understand what is happening.
 
 ```c
+// mmap.c
+// example of using mmap to read and write file content
 #include <stdio.h>
 #include <string.h>
 #include <sys/mman.h>
@@ -67,9 +98,122 @@ int main()
 
 ```
 
-#### Private Mapping of Read-Only Files ####
+Let's analyze it in sections.
 
 ```c
+#include <stdio.h>
+#include <string.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <fcntl.h>
+```
+These arethe header files needed for memory mapping and file operations.
+
+```c
+#define CONTENT_LENGTH 40
+#define CONTENT_OFFSET 5
+```
+The defines are help us make code more reusable. We use the `CONTENT_LENGTH` to define how big of a buffer we need for reading. We could define it after we get the size of the target file but I wanted to keep the code as simple as possible so it is defined statically here.
+
+`CONTENT_OFFSET` defines how far into the file we want to start writing our message. If the offset is 5, the the code will preserve the first 'aaaaa' and then start overwriting the file.
+
+
+
+```c
+struct stat st;
+```
+Declares structure to hold file status–file inode information including file size, permissions, etc.
+
+
+
+
+```c
+char content[CONTENT_LENGTH];
+```
+Buffer for reading.
+
+```c
+char *new_content = "---written using mmap---";
+```
+Content to be written into the memory-mapped file.
+
+
+```c
+void *map;
+```
+Pointer to hold the pointer pointing to the memory region where the kernel mapped the file to.
+
+```c
+  int f = open("./test", O_RDWR);
+```
+Gets file descriptor for the file `test` in read and write mode (`O_RDWR`).
+
+```c
+fstat(f, &st);
+```
+Gets the file status and saves it in `st`. We do this to obtain the file size.
+
+```c
+map = mmap(NULL, st.st_size, PROT_READ | PROT_WRITE, MAP_SHARED, f, 0);
+```
+Map the file `test` into the memory in `MAP_SHARED` mode, with read and write protection (discussed later).
+
+```c
+memcpy((void *)(content), map, CONTENT_LENGTH);
+printf("reading: %s\n", content);
+```
+Copy `CONTENT_LENGTH`-many bytes from the memory-mapped file memory location into our buffer `content`. Since we mapped the file into memory, we can use regular memory operation to access and write the content. Finally, the `printf()` statement prints out the contents of the buffer.
+
+```c
+memcpy(map + CONTENT_OFFSET, (void *)(new_content), strlen(new_content));
+```
+Copy the `new_content` buffer bytes into our memory-mapped file memory location starting at offset `CONTENT_OFFSET`.
+
+```c
+munmap(map, st.st_size);
+close(f);
+return 0;
+```
+Clean up after we are done. `munmap()` tells the kernel that we are done with the memory mapping and the memory space allocated for the file can be used for something else. `close(f)` gets rid of the file descriptor and finally `return` terminates the process.
+
+To understand what is going on when we call mmap(), lets look at the situation graphically.
+
+![Mapping to memory](./map_to_mem.png)
+
+As you can see the file is mapped from its origin (disk) into memory using the `mmap()` system call. `mmap()` returns a pointer which points to the first byte of the memory region where the file is mapped. Do not forget that the addresses we deal with in the computer are virtual addresses and have to go through address translation process during run-time to get the actual physical address of where in memory the file contents resides. We will get back to the address translation later.
+
+When we write into the memory location where the file contents is mapped to, the memory map gets flagged as modified and it is the responsibility of the operating system to write it back to the disk. This operation happens on `unmap()` system call. The operating system now nows we are done with the memory map and check whether it has been modified. Since we opened the map in `MAP_SHARED` mode and `PROT_WRITE` protection, it gets written back to the disk.
+
+#### Private Mapping of Read-Only Files ####
+
+Let's do an experiment with a read-only file to gain a little more knowledge before attempting the exploit. The code is fairly similar to the code we have already ran, but there are a few differences.
+
+We will need to create a read-only file. The simplest way to do so is to create a file as a root. You can run the following to create a read-only file.
+
+```bash
+$ su -c "echo aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa > test"
+```
+Now we can check that the file `test` is truly read-only.
+
+```bash
+$ ls -l test
+-rw-r--r-- 1 root root 29 Nov 17 02:24 test
+```
+We can also attempt to write into it as a regular user.
+
+```bash
+$ echo "lets write readonly" > test
+bash: test: Permission denied
+```
+
+As expected, we cannot write to a read-only file as a regular user. 
+
+Let's look at the following code now.
+
+```c
+// mmap_private.c
+// example of using mmap create a read-only file mapping
 #include <stdio.h>
 #include <string.h>
 #include <stdint.h>
@@ -101,7 +245,7 @@ int main()
   
   // read bytes from memory into content
   lseek(fm, (uintptr_t) map, SEEK_SET);
-  read(fm, content, CONTENT_LENGTH); content[CONTENT_LENGTH-1] = '\0';
+  read(fm, content, st.st_size); content[CONTENT_LENGTH-1] = '\0';
   printf("reading: %s\n", content); 
   
 
@@ -114,7 +258,7 @@ int main()
 
   // read changed bytes from memory into content
   lseek(fm, (uintptr_t) map, SEEK_SET);
-  read(fm, content, CONTENT_LENGTH); content[CONTENT_LENGTH-1] = '\0';
+  read(fm, content, st.st_size); content[CONTENT_LENGTH-1] = '\0';
   printf("reading: %s\n", content);
 
   // tell the kernel we dont need this page anymore
@@ -125,6 +269,28 @@ int main()
   close(f);
   return 0;
 }
+```
+
+Let's analyze the differences from the previous code.
+
+```c
+map = mmap(NULL, st.st_size, PROT_READ, MAP_PRIVATE, f, 0);
+```
+
+
+```c
+```
+
+```c
+```
+
+```c
+```
+
+```c
+```
+
+```c
 ```
 
 
