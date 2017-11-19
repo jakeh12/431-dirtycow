@@ -97,8 +97,14 @@ int main()
 }
 
 ```
+You can compile and run this file with:
 
-Let's analyze it in sections.
+```bash
+$ gcc -o mmap mmap.c
+$ ./mmap
+```
+
+Let's analyze this program in sections.
 
 ```c
 #include <stdio.h>
@@ -179,7 +185,7 @@ Clean up after we are done. `munmap()` tells the kernel that we are done with th
 
 To understand what is going on when we call mmap(), lets look at the situation graphically.
 
-![Mapping to memory](./map_to_mem.png)
+![Mapping to memory](./map.png)
 
 As you can see the file is mapped from its origin (disk) into memory using the `mmap()` system call. `mmap()` returns a pointer which points to the first byte of the memory region where the file is mapped. Do not forget that the addresses we deal with in the computer are virtual addresses and have to go through address translation process during run-time to get the actual physical address of where in memory the file contents resides. We will get back to the address translation later.
 
@@ -270,33 +276,76 @@ int main()
   return 0;
 }
 ```
+You can compile and run this file with:
+
+```bash
+$ gcc -o mmap_private mmap_private.c
+$ ./mmap_private
+```
 
 Let's analyze the differences from the previous code.
 
 ```c
 map = mmap(NULL, st.st_size, PROT_READ, MAP_PRIVATE, f, 0);
 ```
-
-
-```c
-```
+This time we are opening a read-only file. Therefore, we need to open it appropriately, otherwise the kernel will not allow us to map it. We are using `PROT_READ` to signify we only need a read right to the memory map and `MAP_PRIVATE` to signify that the mapping is private. More on this later.
 
 ```c
+int fm = open("/proc/self/mem", O_RDWR);
 ```
+In Linux operating system, almost everything acts as file that we can write and read out of for simplicity, even devices. Here, we are getting a file descriptor for memory of our own process. We are asking for read and write access. This is neccessary because we will be writing into a "read-only" mapping. If we used memcpy, the operating system would complain because it knows we cannot write into it. However, if we write into the memory on the low-level, it will actually write into the memory. Do not get too excited, becaue the Linux kernel will not allow to write it back into the file.
 
 ```c
+lseek(fm, (uintptr_t) map, SEEK_SET);
 ```
+To be able to use the `read()` system call which follows shortly, we need to tell the `read()` where to start. This is done by calling `lseek()` system call and the virtual address–our map pointer.
 
 ```c
+read(fm, content, st.st_size);
 ```
+Read `st.st_size`-many bytes (file length) from fm (our memory) into the buffer `content`. We print the buffer and you see that we read our file.
 
 ```c
+int result = write(fm, new_content, strlen(new_content));
 ```
+Now, after re-seeking to our `CONTENT_OFFSET` we are going to write into the memory. We save the status of the operation into variable `result` to check whether the `write()` was successful.
+
+After the write, we read the memory again into our buffer and you see that we over wrote the contents in that memory area. Wohoo! Well, maybe not. We will see.
+
+```c
+madvise(map, CONTENT_LENGTH, MADV_DONTNEED);
+```
+This line is not as important in this example but it will be very soon. `madvise()` tells the kernel that the area pointed to by map, spanning over `CONTENT_LENGTH` bytes is not needed at this point and the kernel's page replacement algorithm can take that into consideration when replacing pages. This system call is available purely for performance increase and it is not generally needed. However, we will use it in our exploit later.
+
+Alright, let's see how we wrote into our read-only file as a regular user. Let's run the following command and observe the contents of the file `test`.
+
+```bash
+$ cat test
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+```
+
+What? Why didn't it work? Well, it's not as simple to trick the Linux kernel to do something sinister.
+
+When we create a private mapping of memory and attempt to write into it, the operating system will create a copy of the memory-mapped file memory location and we are only writing into the copy. This is called **copy-on-write**. Now you know what the "cow" is all about.
+
+When we are done with this private copy, the operating system simply discards it because this copy is not directly related to the file on the disk. Then it looks at the original and since it has not been modified ("**dirty**" in operating system jargon means modified whereas clean means untouched), no change on disk is neccessary. Hopefully the term "dirty cow" makes more sense now.
+
+Let's illustrate what happens after we call `write()`.
+
+![Mapping to memory](./cow.png)
+
+Everything else stays the same as it was in the previous code example until we call `write()`. Since the mapping is private, a `write()` will cause a copy-on-write. In other words, the kernel will provide us a copy to write into. Now it is important to realize that the physical address of the copy is different from the original but the virtual is not. The virtual address saved in our `map` pointer stays the same but the translated physical address is now different. The `write()` change is signified in red in the drawing. When we call either `madvise()` or `unmap()`, the following happens.
+
+![Mapping to memory](./cleanup.png)
+
+The copy gets discarded, the pointer now points to the original address, the kernel checks whether there are any changes to be written to disk (no changes in our case because we only wrote to the copy) and the file contents is deallocated from the memory.
+
+This explains why we were able to write into the memory and yet we did not change the contents of the file. Let's add threads to be able to change the contents of a read-only file.
 
 
 #### Racing Threads ####
-In this example, we are actually going to write into a read-only file. The `write_thread` is running `write` which writes into the memory-mapped file memory location. Note that the write operation is not an atomic operation.
-At the same time, the `madvise_thread` is constantly running `madvise` to tell the kernel that the section of allocated memory is not needed and can be freed the future.
+In this example, we are actually going to write into a read-only file. The `write_thread` is running `write()` which writes into the memory-mapped file memory location. Note that the write operation is not an atomic operation.
+At the same time, the `madvise_thread` is constantly running `madvise()` to tell the kernel that the section of allocated memory is not needed and can be freed the future.
 
 ```c
 // racing.c
@@ -366,7 +415,7 @@ int main()
 }
 ```
 
-Compile this file with:
+The code should be self-explanatory so let's run it right away.  We will analyze the program on thread-level later. Compile this file with:
 
 ```bash
 $ gcc -o racing racing.c -lpthread
